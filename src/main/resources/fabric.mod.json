@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "pip",
+  "version": "${version}",
+  "name": "pip",
+  "description": "A simple mod to bring in the ping functionality from other multiplayer games.",
+  "authors": [
+    "cat_pouch"
+  ],
+  "contact": {
+    "repo": "https://github.com/CatSack/pip-fabric"
+  },
+  "license": "MIT",
+  "icon": "assets/pip/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "catpouch.pip.client.PipClient"
+    ],
+    "main": [
+      "catpouch.pip.Pip"
+    ]
+  },
+  "mixins": [
+    "pip.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric": "*",
+    "minecraft": "1.18.2"
+  }
+}
