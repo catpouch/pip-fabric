@@ -1,5 +1,6 @@
 package catpouch.pip.client;
 
+import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,13 +20,29 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Environment(EnvType.CLIENT)
 public class PipClient implements ClientModInitializer {
+    Logger logger = LogUtils.getLogger();
+
     public interface PipClientConstants {
         Identifier PING_PACKET_ID = new Identifier("pip", "ping_packet");
     }
 
+//    private byte[] serializePing(Ping ping) throws IOException {
+//        try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+//            ObjectOutputStream out = new ObjectOutputStream(bos);
+//            out.writeObject(ping);
+//            out.flush();
+//            return bos.toByteArray();
+//        }
+//    }
 
     @Override
     public void onInitializeClient() {
@@ -36,23 +53,34 @@ public class PipClient implements ClientModInitializer {
                 "key.category.pip.test"
         ));
 
-        PingProjector projector = new PingProjector();
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-        WorldRenderEvents.LAST.register(projector);
-        HudRenderCallback.EVENT.register(new PingHudOverlay(projector));
+        PingRenderer renderer = new PingRenderer();
+
+        WorldRenderEvents.LAST.register(renderer);
+        HudRenderCallback.EVENT.register(new PingHudOverlay(renderer));
+
         ClientPlayNetworking.registerGlobalReceiver(PipClientConstants.PING_PACKET_ID, (client, handler, buf, responseSender) -> {
-//            client.player.sendMessage(new LiteralText(buf.readBlockPos().toShortString()), false);
-            BlockPos target = buf.readBlockPos();
-            String message = target.toShortString();
+            BlockPos pos = buf.readBlockPos();
+            UUID uuid = buf.readUuid();
 
             client.execute(() -> {
-                client.player.sendMessage(new LiteralText(message), false);
+                if(client.player != null) {
+                    renderer.addPing(pos, uuid);
+                    //TODO: previous task is still scheduled even when new ping is placed. cancel previous task. also fix the weird stuff with the ping changing position
+                    executorService.schedule(() -> renderer.removePing(uuid), 10, TimeUnit.SECONDS);
+                } else {
+                    logger.warn("Client is missing player instance!");
+                }
             });
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while(pingBinding.wasPressed()) {
                 HitResult hit = client.crosshairTarget;
+                if(client.player == null || hit == null) {
+                    continue;
+                }
                 PacketByteBuf buf = PacketByteBufs.create();
                 switch(hit.getType()) {
                     case MISS:
@@ -61,13 +89,16 @@ public class PipClient implements ClientModInitializer {
                         BlockHitResult blockHit = (BlockHitResult) hit;
                         BlockPos blockPos = blockHit.getBlockPos();
                         buf.writeBlockPos(blockPos);
+                        buf.writeUuid(client.player.getUuid());
                         ClientPlayNetworking.send(PipClientConstants.PING_PACKET_ID, buf);
                         break;
                     case ENTITY:
                         EntityHitResult entityHit = (EntityHitResult) hit;
                         BlockPos entityPos = entityHit.getEntity().getBlockPos();
                         buf.writeBlockPos(entityPos);
+                        buf.writeUuid(client.player.getUuid());
                         ClientPlayNetworking.send(PipClientConstants.PING_PACKET_ID, buf);
+                        break;
                 }
             }
         });
