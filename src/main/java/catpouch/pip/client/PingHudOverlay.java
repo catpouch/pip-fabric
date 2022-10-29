@@ -28,7 +28,7 @@ public class PingHudOverlay implements HudRenderCallback {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.setShaderTexture(0, tex);
         for(Vec3f pos : positions) {
-            DrawableHelper.drawTexture(matrixStack, (int) pos.getX(), (int) pos.getY(), 0, 0, 10, 10, 10, 10);
+            DrawableHelper.drawTexture(matrixStack, (int) pos.getX() - 5, (int) pos.getY() - 5, 0, 0, 10, 10, 10, 10);
         }
     }
 }

@@ -22,7 +22,7 @@ public class PingRenderer implements WorldRenderEvents.Last {
     public void addPing(BlockPos pos, UUID uuid) {
         System.out.println(pos.toShortString());
         System.out.println(uuid.toString());
-        pings.put(uuid, new Vector4f(pos.getX(), pos.getY(), pos.getZ(), 1f));
+        pings.put(uuid, new Vector4f(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, 1f));
     }
 
     public void removePing(UUID uuid) {
@@ -53,6 +53,10 @@ public class PingRenderer implements WorldRenderEvents.Last {
             Vec3f winPos = new Vec3f(ping.getX() / posW, (ping.getY() / posW) * -1f, ping.getZ() / posW);
             winPos.add(1f, 1f, 1f);
             winPos.scale(0.5f);
+            if(winPos.getZ() > 1f) {
+                continue;
+            }
+            winPos.clamp(0f, 1f);
             winPos.multiplyComponentwise(width, height, 1);
             projectedPositions.add(winPos);
         }
