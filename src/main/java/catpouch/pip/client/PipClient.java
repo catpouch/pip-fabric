@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Environment(EnvType.CLIENT)
@@ -60,6 +61,8 @@ public class PipClient implements ClientModInitializer {
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay(renderer));
 
+        final ScheduledFuture<?>[] pingRemoval = new ScheduledFuture<?>[1]; //anguish
+
         ClientPlayNetworking.registerGlobalReceiver(PipClientConstants.PING_PACKET_ID, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
             UUID uuid = buf.readUuid();
@@ -67,8 +70,10 @@ public class PipClient implements ClientModInitializer {
             client.execute(() -> {
                 if(client.player != null) {
                     renderer.addPing(pos, uuid);
-                    //TODO: previous task is still scheduled even when new ping is placed. cancel previous task. also fix the weird stuff with the ping changing position
-                    executorService.schedule(() -> renderer.removePing(uuid), 10, TimeUnit.SECONDS);
+                    if(pingRemoval[0] != null) {
+                        pingRemoval[0].cancel(false);
+                    }
+                    pingRemoval[0] = executorService.schedule(() -> renderer.removePing(uuid), 10, TimeUnit.SECONDS);
                 } else {
                     logger.warn("Client is missing player instance!");
                 }

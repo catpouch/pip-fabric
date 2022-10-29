@@ -12,7 +12,7 @@ public class PingRenderer implements WorldRenderEvents.Last {
 
     private List<Vec3f> projectedPositions;
 
-    private final Map<UUID, Vector4f> pings = new HashMap<UUID, Vector4f>();
+    private final Map<UUID, Vector4f> pings = new HashMap<>();
 
     public List<Vec3f> getProjectedPositions() {
 //        return new Vec3i((int) winPos.getX(), (int) winPos.getY(), (int) winPos.getZ());
@@ -36,14 +36,15 @@ public class PingRenderer implements WorldRenderEvents.Last {
 
 //        System.out.println(pings.toString());
 
-        projectedPositions = new ArrayList<Vec3f>();
+        projectedPositions = new ArrayList<>();
         Matrix4f position = context.matrixStack().peek().getPositionMatrix();
         Matrix4f projection = context.projectionMatrix();
         Window window = MinecraftClient.getInstance().getWindow();
         int width = window.getScaledWidth();
         int height = window.getScaledHeight();
 
-        for(Vector4f ping : pings.values()) {
+        for(Vector4f pingRef : pings.values()) {
+            Vector4f ping = new Vector4f(pingRef.getX(), pingRef.getY(), pingRef.getZ(), pingRef.getW()); //why is copying so difficult in every language??
             Vec3d cameraPos = context.camera().getPos();
             ping.transform(Matrix4f.translate((float) -cameraPos.x, (float) -cameraPos.y, -(float) cameraPos.z));
             ping.transform(position);
