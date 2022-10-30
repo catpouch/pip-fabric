@@ -69,7 +69,7 @@ public class RenderUtil {
         winPos.add(1f, 1f, 1f);
         winPos.scale(0.5f);
         if(winPos.getX() < 0f || winPos.getX() > 1f || winPos.getY() < 0f || winPos.getY() > 1f || winPos.getZ() > 1f) {
-            return null;
+            return new Vec3f(-1f, -1f, -1f);
         }
         winPos.multiplyComponentwise(width, height, 1);
         return winPos;

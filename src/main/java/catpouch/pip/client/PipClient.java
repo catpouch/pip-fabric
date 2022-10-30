@@ -50,11 +50,11 @@ public class PipClient implements ClientModInitializer {
                 "key.category.pip.test"
         ));
 
-        PingManager manager = PingManager.INSTANCE.getInstance();
+        PingManager manager = PingManager.INSTANCE;
         PingRenderer renderer = new PingRenderer();
 
         WorldRenderEvents.LAST.register(renderer);
-        HudRenderCallback.EVENT.register(new PingHudOverlay(renderer));
+        HudRenderCallback.EVENT.register(new PingHudOverlay());
 
         ClientPlayNetworking.registerGlobalReceiver(PipClientConstants.PING_PACKET_ID, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();

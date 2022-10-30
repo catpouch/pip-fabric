@@ -14,10 +14,10 @@ import net.minecraft.util.math.BlockPos;
 import java.util.UUID;
 
 public class Pip implements ModInitializer {
-    public SimpleConfig CONFIG = SimpleConfig.of("pip").provider(this::configProvider).request();
+    private final SimpleConfig CONFIG = SimpleConfig.of("pip").provider(this::configProvider).request();
 
     private String configProvider(String filename) {
-        return "pingRadius=100d";
+        return "pingRadius=100d\npingGuiScale=2\npingUseInGameGuiScale=false";
     }
 
     public interface PipConstants {
