@@ -1,5 +1,6 @@
 package catpouch.pip.client;
 
+import catpouch.pip.client.util.SimpleConfig;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
