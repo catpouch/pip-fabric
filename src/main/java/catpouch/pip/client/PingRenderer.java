@@ -9,12 +9,6 @@ import java.util.*;
 
 public class PingRenderer implements WorldRenderEvents.Last {
 
-    private final PingManager manager;
-
-    public PingRenderer(PingManager manager) {
-        this.manager = manager;
-    }
-
     private List<Vec3f> projectedPositions;
 
     public List<Vec3f> getProjectedPositions() {
@@ -23,10 +17,14 @@ public class PingRenderer implements WorldRenderEvents.Last {
 
     @Override
     public void onLast(WorldRenderContext context) {
+//        RenderUtil.renderPing(context);
         projectedPositions = new ArrayList<>();
-        for(Ping ping : manager.getPings()) {
+//        if(PingManager.INSTANCE == null) {
+//            return;
+//        }
+        for(Ping ping : PingManager.INSTANCE.getInstance().getPings()) {
             BlockPos position = ping.getPos();
-            Vec3f projected = RenderUtil.projectPoint(context, new Vector4f(position.getX() + 0.5f, position.getY() + 0.5f, position.getZ() + 0.5f, 1f));
+            Vec3f projected = RenderUtil.projectPoint(context, new Vector4f(position.getX() + 0.5f, position.getY() + 1f, position.getZ() + 0.5f, 1f));
             if(projected != null) {
                 projectedPositions.add(projected);
             }

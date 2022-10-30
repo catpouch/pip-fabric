@@ -50,8 +50,8 @@ public class PipClient implements ClientModInitializer {
                 "key.category.pip.test"
         ));
 
-        PingManager manager = new PingManager();
-        PingRenderer renderer = new PingRenderer(manager);
+        PingManager manager = PingManager.INSTANCE.getInstance();
+        PingRenderer renderer = new PingRenderer();
 
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay(renderer));

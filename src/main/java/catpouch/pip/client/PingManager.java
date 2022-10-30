@@ -8,8 +8,18 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class PingManager {
-    private final Cache<UUID, Ping> pings = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.SECONDS).build();
+public enum PingManager {
+    INSTANCE(CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.SECONDS).build());
+
+    private final Cache<UUID, Ping> pings;
+
+    PingManager(Cache<UUID, Ping> cache) {
+        this.pings = cache;
+    }
+
+    public PingManager getInstance() {
+        return INSTANCE;
+    }
 
     public void addPing(Ping ping) {
         pings.put(ping.getOwner(), ping);
