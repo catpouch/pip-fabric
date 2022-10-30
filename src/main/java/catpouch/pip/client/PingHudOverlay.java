@@ -7,11 +7,12 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.math.Vec3i;
 
 import java.util.List;
 
 public class PingHudOverlay implements HudRenderCallback {
+    //TODO move all of this code into a different render call
+
     private final PingRenderer projector;
 
     private static final Identifier tex = new Identifier("pip", "icon.png");
@@ -27,8 +28,10 @@ public class PingHudOverlay implements HudRenderCallback {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.setShaderTexture(0, tex);
+//        System.out.println(matrixStack.peek().getPositionMatrix());
         for(Vec3f pos : positions) {
             DrawableHelper.drawTexture(matrixStack, (int) pos.getX() - 5, (int) pos.getY() - 5, 0, 0, 10, 10, 10, 10);
+//            DrawableHelper.fill(matrixStack, (int) pos.getX() - 5, (int) pos.getY() - 5, (int) pos.getX() + 5, (int) pos.getY() + 5, 0xFF0000);
         }
     }
 }

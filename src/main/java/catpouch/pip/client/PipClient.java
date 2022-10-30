@@ -22,10 +22,6 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 @Environment(EnvType.CLIENT)
 public class PipClient implements ClientModInitializer {
@@ -53,14 +49,11 @@ public class PipClient implements ClientModInitializer {
                 "key.category.pip.test"
         ));
 
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-
-        PingRenderer renderer = new PingRenderer();
+        PingManager manager = new PingManager();
+        PingRenderer renderer = new PingRenderer(manager);
 
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay(renderer));
-
-        final ScheduledFuture<?>[] pingRemoval = new ScheduledFuture<?>[1]; //anguish
 
         ClientPlayNetworking.registerGlobalReceiver(PipClientConstants.PING_PACKET_ID, (client, handler, buf, responseSender) -> {
             BlockPos pos = buf.readBlockPos();
@@ -68,11 +61,7 @@ public class PipClient implements ClientModInitializer {
 
             client.execute(() -> {
                 if(client.player != null) {
-                    renderer.addPing(pos, uuid);
-                    if(pingRemoval[0] != null) {
-                        pingRemoval[0].cancel(false);
-                    }
-                    pingRemoval[0] = executorService.schedule(() -> renderer.removePing(uuid), 10, TimeUnit.SECONDS);
+                    manager.addPing(new Ping(pos, uuid));
                 } else {
                     logger.warn("Client is missing player instance!");
                 }
