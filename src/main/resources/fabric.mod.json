@@ -19,6 +19,9 @@
     ],
     "main": [
       "catpouch.pip.Pip"
+    ],
+    "modmenu": [
+      "catpouch.pip.client.config.PipModMenuIntegration"
     ]
   },
   "mixins": [

@@ -1,6 +1,5 @@
 package catpouch.pip.client;
 
-import catpouch.pip.client.util.SimpleConfig;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -31,15 +30,6 @@ public class PipClient implements ClientModInitializer {
     public interface PipClientConstants {
         Identifier PING_PACKET_ID = new Identifier("pip", "ping_packet");
     }
-
-//    private byte[] serializePing(Ping ping) throws IOException {
-//        try(ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-//            ObjectOutputStream out = new ObjectOutputStream(bos);
-//            out.writeObject(ping);
-//            out.flush();
-//            return bos.toByteArray();
-//        }
-//    }
 
     @Override
     public void onInitializeClient() {

@@ -1,7 +1,8 @@
 package catpouch.pip.client;
 
-import catpouch.pip.client.util.SimpleConfig;
+import catpouch.pip.client.config.PipClientConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -9,18 +10,15 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class PingHudOverlay implements HudRenderCallback {
 
     private static final Identifier tex = new Identifier("pip", "ping.png");
 
-    private final SimpleConfig CONFIG = SimpleConfig.of("pip").request();
+    private final PipClientConfig CONFIG = AutoConfig.getConfigHolder(PipClientConfig.class).getConfig();
 
     public PingHudOverlay() {}
 
@@ -31,9 +29,9 @@ public class PingHudOverlay implements HudRenderCallback {
         TextRenderer textRenderer = client.textRenderer;
         RenderSystem.setShaderTexture(0, tex);
 
-        boolean useInGameScale = CONFIG.getOrDefault("pingUseInGameGuiScale", false);
+        boolean useInGameScale = CONFIG.useInGameGuiScale;
         int inGameScale = (int) client.getWindow().getScaleFactor();
-        int scale = useInGameScale ? inGameScale : CONFIG.getOrDefault("pingGuiScale", (int) client.getWindow().getScaleFactor());
+        int scale = useInGameScale ? inGameScale : CONFIG.pingGuiScale;
 
         matrixStack.push();
         matrixStack.scale(1f/inGameScale, 1f/inGameScale, 1f);
@@ -44,7 +42,7 @@ public class PingHudOverlay implements HudRenderCallback {
             final int posY = (int) ping.getProjectedPos().getY();
             final int x = posX - width / 2;
             final int y = posY - height;
-            DrawableHelper.drawTexture(matrixStack, x, y, -91, 0, 0, width, height, width, height); //-91 is the depth below all other hud elements
+            DrawableHelper.drawTexture(matrixStack, x, y, -91, 0, 0, width, height, width, height); //TODO fix rendering over f3 stuff
             matrixStack.scale(scale, scale, 1f);
             World world = client.world;
             String playerName = "";

@@ -1,6 +1,8 @@
 package catpouch.pip;
 
-import catpouch.pip.client.util.SimpleConfig;
+import catpouch.pip.client.config.PipClientConfig;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -14,25 +16,22 @@ import net.minecraft.util.math.BlockPos;
 import java.util.UUID;
 
 public class Pip implements ModInitializer {
-    private final SimpleConfig CONFIG = SimpleConfig.of("pip").provider(this::configProvider).request();
-
-    private String configProvider(String filename) {
-        return "pingRadius=100d\npingGuiScale=2\npingUseInGameGuiScale=false";
-    }
-
     public interface PipConstants {
         Identifier PING_PACKET_ID = new Identifier("pip", "ping_packet");
     }
 
     @Override
     public void onInitialize() {
+        AutoConfig.register(PipClientConfig.class, GsonConfigSerializer::new);
+        final PipClientConfig CONFIG = AutoConfig.getConfigHolder(PipClientConfig.class).getConfig();
+
         ServerPlayNetworking.registerGlobalReceiver(PipConstants.PING_PACKET_ID, (server, player, handler, buf, responseSender) -> {
             BlockPos blockPos = buf.readBlockPos();
             UUID uuid = buf.readUuid();
             PacketByteBuf returnBuf = PacketByteBufs.create();
             returnBuf.writeBlockPos(blockPos);
             returnBuf.writeUuid(uuid);
-            for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), CONFIG.getOrDefault("pingRadius", 100d))) {
+            for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), CONFIG.pingRadius)) {
                 ServerPlayNetworking.send(onlinePlayer, PipConstants.PING_PACKET_ID, returnBuf);
             }
         });
