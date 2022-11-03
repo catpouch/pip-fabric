@@ -60,7 +60,7 @@ public class PingHudOverlay implements HudRenderCallback {
                 textX = Math.round(textX);
                 textY = Math.round(textY);
             }
-            textRenderer.draw(matrixStack, playerName, textX, textY, 0xFFFFFF);
+            textRenderer.drawWithShadow(matrixStack, playerName, textX, textY, 0xFFFFFF);
         }
         matrixStack.scale((float) inGameScale/scale, (float) inGameScale/scale, 1f);
         matrixStack.pop();
