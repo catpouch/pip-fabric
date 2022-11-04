@@ -1,0 +1,6 @@
+{
+  "text.autoconfig.pip.option.useInGameGuiScale": "Use In Game GUI Scale",
+  "text.autoconfig.pip.option.pingGuiScale": "Ping GUI Scale",
+  "text.autoconfig.pip.option.pingRadius": "Ping Reception Radius",
+  "text.autoconfig.pip.option.pingExpirationDelay": "Ping Lifetime In Seconds"
+}

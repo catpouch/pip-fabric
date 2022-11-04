@@ -1,6 +1,10 @@
 package catpouch.pip.client;
 
 import com.mojang.logging.LogUtils;
+
+import catpouch.pip.PipConstants;
+import catpouch.pip.client.pings.EntityPing;
+import catpouch.pip.client.pings.PosPing;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,10 +14,11 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -26,9 +31,23 @@ import java.util.UUID;
 @Environment(EnvType.CLIENT)
 public class PipClient implements ClientModInitializer {
     Logger logger = LogUtils.getLogger();
+    
+    private void receivePingPacket(MinecraftClient client, PacketByteBuf buf, boolean isEntity) {
+        final BlockPos pos = isEntity ? new BlockPos(0, 0, 0) : buf.readBlockPos();
+        final int entityId = isEntity ? buf.readInt() : 0;
+        final UUID uuid = buf.readUuid();
 
-    public interface PipClientConstants {
-        Identifier PING_PACKET_ID = new Identifier("pip", "ping_packet");
+        if(client == null) {
+            return;
+        }
+
+        client.execute(() -> {
+            if(isEntity) {
+                PingManager.INSTANCE.addPing(new EntityPing(entityId, uuid));
+            } else {
+                PingManager.INSTANCE.addPing(new PosPing(pos, uuid));
+            }
+        });
     }
 
     @Override
@@ -40,23 +59,17 @@ public class PipClient implements ClientModInitializer {
                 "key.category.pip.test"
         ));
 
-        PingManager manager = PingManager.INSTANCE;
         PingRenderer renderer = new PingRenderer();
 
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay());
 
-        ClientPlayNetworking.registerGlobalReceiver(PipClientConstants.PING_PACKET_ID, (client, handler, buf, responseSender) -> {
-            BlockPos pos = buf.readBlockPos();
-            UUID uuid = buf.readUuid();
+        ClientPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET_ID, (client, handler, buf, responseSender) -> {
+            receivePingPacket(client, buf, false);
+        });
 
-            client.execute(() -> {
-                if(client.player != null) {
-                    manager.addPing(new Ping(pos, uuid));
-                } else {
-                    logger.warn("Client is missing player instance!");
-                }
-            });
+        ClientPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET_ID, (client, handler, buf, responseSender) -> {
+            receivePingPacket(client, buf, true);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -74,14 +87,14 @@ public class PipClient implements ClientModInitializer {
                         BlockPos blockPos = blockHit.getBlockPos();
                         buf.writeBlockPos(blockPos);
                         buf.writeUuid(client.player.getUuid());
-                        ClientPlayNetworking.send(PipClientConstants.PING_PACKET_ID, buf);
+                        ClientPlayNetworking.send(PipConstants.POS_PING_PACKET_ID, buf);
                         break;
                     case ENTITY:
                         EntityHitResult entityHit = (EntityHitResult) hit;
-                        BlockPos entityPos = entityHit.getEntity().getBlockPos();
-                        buf.writeBlockPos(entityPos);
+                        Entity entity = entityHit.getEntity();
+                        buf.writeInt(entity.getId());
                         buf.writeUuid(client.player.getUuid());
-                        ClientPlayNetworking.send(PipClientConstants.PING_PACKET_ID, buf);
+                        ClientPlayNetworking.send(PipConstants.ENTITY_PING_PACKET_ID, buf);
                         break;
                 }
             }
