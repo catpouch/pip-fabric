@@ -2,7 +2,12 @@ package catpouch.pip;
 
 import net.minecraft.util.Identifier;
 
-public interface PipConstants {
-    public static final Identifier POS_PING_PACKET_ID = new Identifier("pip", "ping_pos_packet");
-    public static final Identifier ENTITY_PING_PACKET_ID = new Identifier("pip", "ping_entity_packet");
+public enum PipConstants {
+    POS_PING_PACKET(new Identifier("pip", "ping_pos_packet")),
+    ENTITY_PING_PACKET(new Identifier("pip", "ping_entity_packet"));
+    private final Identifier id;
+    PipConstants(Identifier id) {
+        this.id = id;
+    }
+    public Identifier id() { return id; }
 }

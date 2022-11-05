@@ -32,21 +32,33 @@ import java.util.UUID;
 public class PipClient implements ClientModInitializer {
     Logger logger = LogUtils.getLogger();
     
-    private void receivePingPacket(MinecraftClient client, PacketByteBuf buf, boolean isEntity) {
-        final BlockPos pos = isEntity ? new BlockPos(0, 0, 0) : buf.readBlockPos();
-        final int entityId = isEntity ? buf.readInt() : 0;
+    private void receivePingPacket(MinecraftClient client, PacketByteBuf buf, PipConstants pingType) {
+        // final BlockPos pos = isEntity ? new BlockPos(0, 0, 0) : buf.readBlockPos();
+        // final int entityId = isEntity ? buf.readInt() : 0;
         final UUID uuid = buf.readUuid();
 
-        if(client == null) {
+        Ping ping;
+
+        switch(pingType) {
+            case POS_PING_PACKET:
+                final BlockPos pos = buf.readBlockPos();
+                ping = new PosPing(pos, uuid);
+                break;
+            case ENTITY_PING_PACKET:
+                final int entityId = buf.readInt();
+                ping = new EntityPing(entityId, uuid);
+                break;
+            default:
+                ping = null;
+                break;
+        }
+
+        if(client == null || ping == null) {
             return;
         }
 
         client.execute(() -> {
-            if(isEntity) {
-                PingManager.INSTANCE.addPing(new EntityPing(entityId, uuid));
-            } else {
-                PingManager.INSTANCE.addPing(new PosPing(pos, uuid));
-            }
+            PingManager.INSTANCE.addPing(ping);
         });
     }
 
@@ -64,12 +76,12 @@ public class PipClient implements ClientModInitializer {
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay());
 
-        ClientPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET_ID, (client, handler, buf, responseSender) -> {
-            receivePingPacket(client, buf, false);
+        ClientPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET.id(), (client, handler, buf, responseSender) -> {
+            receivePingPacket(client, buf, PipConstants.POS_PING_PACKET);
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET_ID, (client, handler, buf, responseSender) -> {
-            receivePingPacket(client, buf, true);
+        ClientPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET.id(), (client, handler, buf, responseSender) -> {
+            receivePingPacket(client, buf, PipConstants.ENTITY_PING_PACKET);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -85,16 +97,16 @@ public class PipClient implements ClientModInitializer {
                     case BLOCK:
                         BlockHitResult blockHit = (BlockHitResult) hit;
                         BlockPos blockPos = blockHit.getBlockPos();
-                        buf.writeBlockPos(blockPos);
                         buf.writeUuid(client.player.getUuid());
-                        ClientPlayNetworking.send(PipConstants.POS_PING_PACKET_ID, buf);
+                        buf.writeBlockPos(blockPos);
+                        ClientPlayNetworking.send(PipConstants.POS_PING_PACKET.id(), buf);
                         break;
                     case ENTITY:
                         EntityHitResult entityHit = (EntityHitResult) hit;
                         Entity entity = entityHit.getEntity();
-                        buf.writeInt(entity.getId());
                         buf.writeUuid(client.player.getUuid());
-                        ClientPlayNetworking.send(PipConstants.ENTITY_PING_PACKET_ID, buf);
+                        buf.writeInt(entity.getId());
+                        ClientPlayNetworking.send(PipConstants.ENTITY_PING_PACKET.id(), buf);
                         break;
                 }
             }

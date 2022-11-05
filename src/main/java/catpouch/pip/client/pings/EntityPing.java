@@ -18,7 +18,6 @@ public class EntityPing extends Ping {
 
     @Override
     public Vec3f getPos() {
-        MinecraftClient client = MinecraftClient.getInstance();
         if(client == null) {
             return new Vec3f(0, 0, 0);
         }

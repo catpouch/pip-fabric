@@ -16,30 +16,33 @@ import net.minecraft.util.math.BlockPos;
 import java.util.UUID;
 
 public class Pip implements ModInitializer {
-    private void receivePingPacket(ServerPlayerEntity player, PacketByteBuf buf, PacketSender responseSender, boolean isEntity) {
+    private void receivePingPacket(ServerPlayerEntity player, PacketByteBuf buf, PacketSender responseSender, PipConstants pingType) {
         UUID uuid = buf.readUuid();
         PacketByteBuf returnBuf = PacketByteBufs.create();
         returnBuf.writeUuid(uuid);
-        if(isEntity) {
-            int entityId = buf.readInt();
-            returnBuf.writeInt(entityId);
-        } else {
-            BlockPos pos = buf.readBlockPos();
-            returnBuf.writeBlockPos(pos);
+        switch(pingType) {
+            case POS_PING_PACKET:
+                BlockPos pos = buf.readBlockPos();
+                returnBuf.writeBlockPos(pos);
+                break;
+            case ENTITY_PING_PACKET:
+                int entityId = buf.readInt();
+                returnBuf.writeInt(entityId);
+                break;
         }
         for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), AutoConfig.getConfigHolder(PipClientConfig.class).getConfig().pingRadius)) {
-            ServerPlayNetworking.send(onlinePlayer, isEntity ? PipConstants.ENTITY_PING_PACKET_ID : PipConstants.POS_PING_PACKET_ID, returnBuf);
+            ServerPlayNetworking.send(onlinePlayer, pingType.id(), returnBuf);
         }
     }
 
     @Override
     public void onInitialize() {
         AutoConfig.register(PipClientConfig.class, GsonConfigSerializer::new);
-        ServerPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET_ID, (server, player, handler, buf, responseSender) -> {
-            receivePingPacket(player, buf, responseSender, false);
+        ServerPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET.id(), (server, player, handler, buf, responseSender) -> {
+            receivePingPacket(player, buf, responseSender, PipConstants.POS_PING_PACKET);
         });
-        ServerPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET_ID, (server, player, handler, buf, responseSender) -> {
-            receivePingPacket(player, buf, responseSender, true);
+        ServerPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET.id(), (server, player, handler, buf, responseSender) -> {
+            receivePingPacket(player, buf, responseSender, PipConstants.ENTITY_PING_PACKET);
         });
     }
 }
