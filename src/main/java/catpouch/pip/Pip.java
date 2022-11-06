@@ -20,15 +20,15 @@ public class Pip implements ModInitializer {
         UUID uuid = buf.readUuid();
         PacketByteBuf returnBuf = PacketByteBufs.create();
         returnBuf.writeUuid(uuid);
-        switch(pingType) {
-            case POS_PING_PACKET:
+        switch (pingType) {
+            case POS_PING_PACKET -> {
                 BlockPos pos = buf.readBlockPos();
                 returnBuf.writeBlockPos(pos);
-                break;
-            case ENTITY_PING_PACKET:
+            }
+            case ENTITY_PING_PACKET -> {
                 int entityId = buf.readInt();
                 returnBuf.writeInt(entityId);
-                break;
+            }
         }
         for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), AutoConfig.getConfigHolder(PipClientConfig.class).getConfig().pingRadius)) {
             ServerPlayNetworking.send(onlinePlayer, pingType.id(), returnBuf);
@@ -38,11 +38,10 @@ public class Pip implements ModInitializer {
     @Override
     public void onInitialize() {
         AutoConfig.register(PipClientConfig.class, GsonConfigSerializer::new);
-        ServerPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET.id(), (server, player, handler, buf, responseSender) -> {
-            receivePingPacket(player, buf, responseSender, PipConstants.POS_PING_PACKET);
-        });
-        ServerPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET.id(), (server, player, handler, buf, responseSender) -> {
-            receivePingPacket(player, buf, responseSender, PipConstants.ENTITY_PING_PACKET);
-        });
+        for(PipConstants id : PipConstants.values()) {
+            ServerPlayNetworking.registerGlobalReceiver(id.id(), (server, player, handler, buf, responseSender) -> {
+                receivePingPacket(player, buf, responseSender, id);
+            });
+        }
     }
 }

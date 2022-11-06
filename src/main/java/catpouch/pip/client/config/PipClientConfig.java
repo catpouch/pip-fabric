@@ -4,6 +4,7 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
+//TODO this isn't client only, also add server-only config
 @Config(name = "pip")
 public class PipClientConfig implements ConfigData {
 

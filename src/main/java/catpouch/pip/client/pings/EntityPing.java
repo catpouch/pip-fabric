@@ -7,18 +7,23 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3f;
 
+//TODO destroy when entity is removed from world
 public class EntityPing extends Ping {
-    private Entity entity;
-    private MinecraftClient client = MinecraftClient.getInstance();
+    private final int entityId;
+    private final MinecraftClient client = MinecraftClient.getInstance();
 
     public EntityPing(int entityId, UUID owner) {
-        this.entity = client.world.getEntityById(entityId);
+        this.entityId = entityId;
         this.owner = owner;
     }
 
     @Override
     public Vec3f getPos() {
-        if(client == null) {
+        if(client == null || client.world == null) {
+            return new Vec3f(0, 0, 0);
+        }
+        Entity entity = client.world.getEntityById(entityId);
+        if(entity == null) {
             return new Vec3f(0, 0, 0);
         }
         Vec3f pos = new Vec3f(entity.getCameraPosVec(client.getTickDelta()));

@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3f;
 
 public class PosPing extends Ping {
-    private BlockPos pos;
+    private final BlockPos pos;
 
     public PosPing(BlockPos pos, UUID owner) {
         this.pos = pos;

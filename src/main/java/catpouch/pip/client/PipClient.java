@@ -71,13 +71,11 @@ public class PipClient implements ClientModInitializer {
         WorldRenderEvents.LAST.register(renderer);
         HudRenderCallback.EVENT.register(new PingHudOverlay());
 
-        ClientPlayNetworking.registerGlobalReceiver(PipConstants.POS_PING_PACKET.id(), (client, handler, buf, responseSender) -> {
-            receivePingPacket(client, buf, PipConstants.POS_PING_PACKET);
-        });
-
-        ClientPlayNetworking.registerGlobalReceiver(PipConstants.ENTITY_PING_PACKET.id(), (client, handler, buf, responseSender) -> {
-            receivePingPacket(client, buf, PipConstants.ENTITY_PING_PACKET);
-        });
+        for(PipConstants id : PipConstants.values()) {
+            ClientPlayNetworking.registerGlobalReceiver(id.id(), (client, handler, buf, responseSender) -> {
+                receivePingPacket(client, buf, id);
+            });
+        }
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while(pingBinding.wasPressed()) {

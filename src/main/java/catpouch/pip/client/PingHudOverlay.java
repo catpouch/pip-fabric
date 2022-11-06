@@ -22,6 +22,9 @@ public class PingHudOverlay implements HudRenderCallback {
 
     public PingHudOverlay() {}
 
+    //TODO attempt to move this somewhere else (BEFORE_DEBUG?)
+    //TODO make this ping class specific and add custom outline renderers for item + entity + block pings
+    //TODO add player-specific colors?
     @Override
     public void onHudRender(MatrixStack matrixStack, float tickDelta) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -35,6 +38,7 @@ public class PingHudOverlay implements HudRenderCallback {
 
         matrixStack.push();
         matrixStack.scale(1f/inGameScale, 1f/inGameScale, 1f);
+        matrixStack.translate(0d, 0d, -91d);
         for(Ping ping : pings) {
             final int width = 24 * scale;
             final int height = 12 * scale;
@@ -42,7 +46,7 @@ public class PingHudOverlay implements HudRenderCallback {
             final int posY = (int) ping.getProjectedPos().getY();
             final int x = posX - width / 2;
             final int y = posY - height;
-            DrawableHelper.drawTexture(matrixStack, x, y, -91, 0, 0, width, height, width, height); //TODO fix rendering over f3 stuff
+            DrawableHelper.drawTexture(matrixStack, x, y, 0, 0, 0, width, height, width, height);
             matrixStack.scale(scale, scale, 1f);
             World world = client.world;
             String playerName = "";
@@ -60,6 +64,7 @@ public class PingHudOverlay implements HudRenderCallback {
             }
             textRenderer.drawWithShadow(matrixStack, playerName, textX, textY, 0xFFFFFF);
         }
+        matrixStack.translate(0d, 0d, 91d);
         matrixStack.scale((float) inGameScale/scale, (float) inGameScale/scale, 1f);
         matrixStack.pop();
     }
