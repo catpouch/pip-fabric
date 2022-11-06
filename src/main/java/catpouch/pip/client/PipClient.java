@@ -33,33 +33,27 @@ public class PipClient implements ClientModInitializer {
     Logger logger = LogUtils.getLogger();
     
     private void receivePingPacket(MinecraftClient client, PacketByteBuf buf, PipConstants pingType) {
-        // final BlockPos pos = isEntity ? new BlockPos(0, 0, 0) : buf.readBlockPos();
-        // final int entityId = isEntity ? buf.readInt() : 0;
         final UUID uuid = buf.readUuid();
 
         Ping ping;
 
-        switch(pingType) {
-            case POS_PING_PACKET:
+        switch (pingType) {
+            case POS_PING_PACKET -> {
                 final BlockPos pos = buf.readBlockPos();
                 ping = new PosPing(pos, uuid);
-                break;
-            case ENTITY_PING_PACKET:
+            }
+            case ENTITY_PING_PACKET -> {
                 final int entityId = buf.readInt();
                 ping = new EntityPing(entityId, uuid);
-                break;
-            default:
-                ping = null;
-                break;
+            }
+            default -> ping = null;
         }
 
         if(client == null || ping == null) {
             return;
         }
 
-        client.execute(() -> {
-            PingManager.INSTANCE.addPing(ping);
-        });
+        client.execute(() -> PingManager.INSTANCE.addPing(ping));
     }
 
     @Override
@@ -86,7 +80,7 @@ public class PipClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while(pingBinding.wasPressed()) {
-                HitResult hit = client.crosshairTarget;
+                HitResult hit = RaycastUtil.raycast(client);
                 if(client.player == null || hit == null) {
                     continue;
                 }
