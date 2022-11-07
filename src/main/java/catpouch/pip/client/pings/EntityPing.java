@@ -9,7 +9,7 @@ import net.minecraft.util.math.Vec3f;
 
 //TODO destroy when entity is removed from world
 public class EntityPing extends Ping {
-    private final int entityId;
+    public final int entityId;
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     public EntityPing(int entityId, UUID owner) {

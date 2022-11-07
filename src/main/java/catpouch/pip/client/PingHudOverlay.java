@@ -23,7 +23,7 @@ public class PingHudOverlay implements HudRenderCallback {
     public PingHudOverlay() {}
 
     //TODO attempt to move this somewhere else (BEFORE_DEBUG?)
-    //TODO make this ping class specific and add custom outline renderers for item + entity + block pings
+    //TODO add outline for block pings
     //TODO add player-specific colors?
     @Override
     public void onHudRender(MatrixStack matrixStack, float tickDelta) {
