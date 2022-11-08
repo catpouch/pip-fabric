@@ -61,9 +61,9 @@ public class PipClient implements ClientModInitializer {
     public void onInitializeClient() {
         KeyBinding pingBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.pip.ping",
-                InputUtil.Type.MOUSE,
-                GLFW.GLFW_MOUSE_BUTTON_MIDDLE,
-                "key.category.pip.test"
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_V,
+                "key.category.pip"
         ));
 
         PingRenderer renderer = new PingRenderer();

@@ -13,7 +13,9 @@ public class PipClientConfig implements ConfigData {
     @ConfigEntry.BoundedDiscrete(min = 1L, max = 6L)
     public int pingGuiScale = 2;
 
-    public long pingRadius = 100L;
+    public long pingReceptionRadius = 100L;
 
     public long pingExpirationDelay = 15L;
+
+    public double pingRadius = 20D;
 }

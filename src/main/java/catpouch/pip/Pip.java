@@ -30,7 +30,7 @@ public class Pip implements ModInitializer {
                 returnBuf.writeInt(entityId);
             }
         }
-        for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), AutoConfig.getConfigHolder(PipClientConfig.class).getConfig().pingRadius)) {
+        for(ServerPlayerEntity onlinePlayer : PlayerLookup.around((ServerWorld) player.world, player.getPos(), AutoConfig.getConfigHolder(PipClientConfig.class).getConfig().pingReceptionRadius)) {
             ServerPlayNetworking.send(onlinePlayer, pingType.id(), returnBuf);
         }
     }
