@@ -1,6 +1,7 @@
 package catpouch.pip.client;
 
 import catpouch.pip.client.config.PipClientConfig;
+import catpouch.pip.client.pings.Ping;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;

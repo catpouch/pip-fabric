@@ -1,5 +1,7 @@
 package catpouch.pip.client;
 
+import catpouch.pip.client.pings.BlockPing;
+import catpouch.pip.client.pings.Ping;
 import catpouch.pip.client.util.RaycastUtil;
 import com.mojang.logging.LogUtils;
 
@@ -24,6 +26,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -46,6 +49,10 @@ public class PipClient implements ClientModInitializer {
             case ENTITY_PING_PACKET -> {
                 final int entityId = buf.readInt();
                 ping = new EntityPing(entityId, uuid);
+            }
+            case BLOCK_PING_PACKET -> {
+                final BlockPos pos = buf.readBlockPos();
+                ping = new BlockPing(pos, uuid);
             }
             default -> ping = null;
         }
@@ -92,7 +99,11 @@ public class PipClient implements ClientModInitializer {
                         BlockPos blockPos = blockHit.getBlockPos();
                         buf.writeUuid(client.player.getUuid());
                         buf.writeBlockPos(blockPos);
-                        ClientPlayNetworking.send(PipConstants.POS_PING_PACKET.id(), buf);
+                        if(blockHit.getSide() == Direction.UP) {
+                            ClientPlayNetworking.send(PipConstants.POS_PING_PACKET.id(), buf);
+                        } else {
+                            ClientPlayNetworking.send(PipConstants.BLOCK_PING_PACKET.id(), buf);
+                        }
                         break;
                     case ENTITY:
                         EntityHitResult entityHit = (EntityHitResult) hit;

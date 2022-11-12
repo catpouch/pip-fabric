@@ -2,7 +2,6 @@ package catpouch.pip.client.pings;
 
 import java.util.UUID;
 
-import catpouch.pip.client.Ping;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3f;
@@ -24,7 +23,7 @@ public class EntityPing extends Ping {
         }
         Entity entity = client.world.getEntityById(entityId);
         if(entity == null) {
-            return new Vec3f(0, 0, 0);
+            return null;
         }
         Vec3f pos = new Vec3f(entity.getCameraPosVec(client.getTickDelta()));
         pos.add(0f, 0.25f, 0f);

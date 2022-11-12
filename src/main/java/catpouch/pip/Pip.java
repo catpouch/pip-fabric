@@ -21,7 +21,7 @@ public class Pip implements ModInitializer {
         PacketByteBuf returnBuf = PacketByteBufs.create();
         returnBuf.writeUuid(uuid);
         switch (pingType) {
-            case POS_PING_PACKET -> {
+            case POS_PING_PACKET, BLOCK_PING_PACKET -> {
                 BlockPos pos = buf.readBlockPos();
                 returnBuf.writeBlockPos(pos);
             }

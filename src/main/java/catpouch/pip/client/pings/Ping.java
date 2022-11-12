@@ -1,4 +1,4 @@
-package catpouch.pip.client;
+package catpouch.pip.client.pings;
 
 import net.minecraft.util.math.Vec3f;
 

@@ -2,7 +2,6 @@ package catpouch.pip.client.pings;
 
 import java.util.UUID;
 
-import catpouch.pip.client.Ping;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3f;
 

@@ -1,6 +1,7 @@
 package catpouch.pip.client;
 
 import catpouch.pip.client.config.PipClientConfig;
+import catpouch.pip.client.pings.Ping;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -21,6 +22,8 @@ public enum PingManager {
     public void addPing(Ping ping) {
         pings.put(ping.getOwner(), ping);
     }
+
+    public void removePing(UUID uuid) { pings.invalidate(uuid); }
 
     public Collection<Ping> getPings() {
         return pings.asMap().values();

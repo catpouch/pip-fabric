@@ -1,6 +1,6 @@
 package catpouch.pip.mixin;
 
-import catpouch.pip.client.Ping;
+import catpouch.pip.client.pings.Ping;
 import catpouch.pip.client.PingManager;
 import catpouch.pip.client.pings.EntityPing;
 import net.minecraft.client.MinecraftClient;
